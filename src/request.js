@@ -70,7 +70,7 @@ export async function post(url, data = {}, params = {}) {
 export async function put(url, data = {}, params = {}) {
   const config = {
     url: mergePath(url),
-    method: 'put', // 使用 put 方法执行 PUT 请求
+    method: 'put',
     headers: {
       Authorization: `token ${githubToken}`,
       'Accept': 'application/vnd.github.v3+json',
@@ -122,3 +122,32 @@ export async function patch(url, data = {}, params = {}) {
     };
   }
 }
+
+export async function del(url, data = {}, params = {}) {
+  const config = {
+    url: mergePath(url),
+    method: 'delete',
+    headers: {
+      Authorization: `token ${githubToken}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+    },
+    params: params,
+    data: data,
+  };
+
+  try {
+    const response = await axios(config);
+    return {
+      data: response.data,
+      ok: response.status >= 200 && response.status < 400 && (response.data.code === undefined ? true : response.data.code - 0 < 400),
+    };
+  } catch (error) {
+    console.error('delete 请求时出错:', error);
+    return {
+      data: error.response.data,
+      ok: false,
+    };
+  }
+}
+

@@ -1,4 +1,4 @@
-import { get, post, put, patch } from '../request.js'
+import { get, post, put, patch ,del } from '../request.js'
 
 // import { global } from '../utils/global.js'
 
@@ -11,6 +11,11 @@ export class GitService {
     createNewBranch(owner, repo, data) {
         const url = `/${owner}/${repo}/git/refs`
         return post(url, data);
+    }
+
+    deleteBranch(owner, repo , branch){
+        const url = `/${owner}/${repo}/branches/${branch}`
+        return del(url);
     }
 
     modifiedContentAndCommit(owner, repo, filePath, data) {
@@ -26,4 +31,11 @@ export class GitService {
         const url = `/${owner}/${repo}/merges`
         return post(url, data);
     }
+
+    createIssue(owner, repo , data){
+        const url = `/${owner}/${repo}/issues`
+        return post(url, data);
+    }
+
+
 }

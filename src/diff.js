@@ -1,4 +1,4 @@
-import { global } from './utils/global.js'
+import { global } from './utils/global.js';
 import { applyPatch } from './updateVersion.js';
 import { services } from './services/index.js';
 
@@ -67,5 +67,25 @@ export async function comparePRs(owner, repo, prNumber1, prNumber2) {
 
     } catch (error) {
         console.error('Error:', error);
+    }
+}
+
+// 创建新的 Issue
+export async function createIssue() {
+    const ISSUE_TITLE = 'Issue Title'; // 替换为 Issue 标题
+    const ISSUE_BODY = 'This is the body of the issue.'; // 替换为 Issue 描述
+    try {
+        const reaData = {
+            title: ISSUE_TITLE,
+            body: ISSUE_BODY
+        }
+        const { data, ok } = await services.git.createIssue(global.owner, global.repo, reaData);
+        if (ok) {
+            console.log('Issue created successfully:');
+        } else {
+            console.error('Error creating issue:', data);
+        }
+    } catch (error) {
+        console.error('Error creating issue:', error.response ? error.response.data : error.message);
     }
 }
