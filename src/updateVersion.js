@@ -2,7 +2,7 @@ import { createIssue } from './diff.js';
 import { services } from './services/index.js';
 import { global } from './utils/global.js'
 
-const branchName = 'update-file-content'; // 新分支名称
+const branchName = 'update-file-content';
 
 export async function applyPatch(patchContent) {
     try {
@@ -60,77 +60,67 @@ export async function createBranchAndCommit(packageJson) {
         await createNewBranch();
         await updateFileContent(packageJson);
         await mergeBranches();
+
         console.log('File modification and commit successful!');
     } catch (error) {
         console.error('Error occurred while creating branch and committing file:', error);
+        createIssue()
     }
 }
 
 // step 1
 async function createNewBranch() {
-    try {
-        const { data } = await services.git.getBranchSha(global.owner, global.repo, "main");
-        const reqData = {
-            ref: `refs/heads/${branchName}`,
-            sha: data.commit.sha,
-        }
-        const refResponse = await services.git.createNewBranch(global.owner, global.repo, reqData);
-        if (refResponse.ok) {
-            console.log(`Branch ${branchName} created successfully!`);
-        } else {
-            console.log(`Failed to create branch ${branchName}!`);
-        }
-        return refResponse;
-    } catch (error) {
-        throw new Error(`Failed to create branch: ${error.message}`);
+    const { data } = await services.git.getBranchSha(global.owner, global.repo, "main");
+    const reqData = {
+        ref: `refs/heads/${branchName}`,
+        sha: data.commit.sha,
     }
+    const refResponse = await services.git.createNewBranch(global.owner, global.repo, reqData);
+    if (refResponse.ok) {
+        console.log(`Branch ${branchName} created successfully!`);
+    } else {
+        console.log(`Failed to create branch ${branchName}!`);
+        createIssue()
+    }
+    return refResponse;
 }
 
 // step 2
 async function updateFileContent(packageJson) {
-    try {
+    const res = await services.file.fetchFileContentFromOtherBranch(branchName);
+    const updatedContent = Buffer.from(JSON.stringify(packageJson, null, 2)).toString('base64');
+    const reqData = {
+        message: global.COMMIT_MESSAGE,
+        content: updatedContent,
+        sha: res.data.sha,
+        branch: branchName
+    }
+    const { data, ok } = await services.git.modifiedContentAndCommit(global.owner, global.repo, global.packageJsonPath, reqData);
+    if (ok) {
+        console.log('File updated and committed successfully:', data.commit);
 
-        const res = await services.file.fetchFileContentFromOtherBranch(branchName);
-
-        const updatedContent = Buffer.from(JSON.stringify(packageJson, null, 2)).toString('base64');
-
-        const reqData = {
-            message: global.COMMIT_MESSAGE,
-            content: updatedContent,
-            sha: res.data.sha,
-            branch: branchName
-        }
-        const { data, ok } = await services.git.modifiedContentAndCommit(global.owner, global.repo, global.packageJsonPath, reqData);
-        if (ok) {
-            console.log('File updated and committed successfully:', data.commit);
-
-        } else {
-            console.error('Error updating file:', data);
-        }
-    } catch (error) {
-        console.error('Error updating file:', error);
+    } else {
+        console.error('Error updating file:', data);
+        createIssue()
     }
 }
 
 // step 3 merge branche to main branch
 async function mergeBranches() {
-    try {
-        const newBranch = branchName;
-        const reqData = {
-            base: 'main',
-            head: newBranch,
-            commit_message: `Merge ${newBranch} into main`
-        };
-        // 请求合并
-        const { data, ok } = await services.git.mergeBranches(global.owner, global.repo, reqData);
-        if (ok) {
-            console.log('Merge successful:', data);
-        } else {
-            console.log('Error Merge:', data);
+    const newBranch = branchName;
+    const reqData = {
+        base: 'main',
+        head: newBranch,
+        commit_message: `Merge ${newBranch} into main`
+    };
 
-        }
-    } catch (error) {
-        console.error('Error merging branches:', error.response ? error.response.data : error.message);
+    const { data, ok } = await services.git.mergeBranches(global.owner, global.repo, reqData);
+    if (ok) {
+        console.log('Merge successful:', data);
+        await services.git.deleteBranch(global.owner, global.repo, branchName);
+    } else {
+        console.log('Error Merge:', data);
+        吧v()
     }
 }
 

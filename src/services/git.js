@@ -14,7 +14,7 @@ export class GitService {
     }
 
     deleteBranch(owner, repo , branch){
-        const url = `/${owner}/${repo}/branches/${branch}`
+        const url = `/${owner}/${repo}/git/refs/heads/${branch}`
         return del(url);
     }
 

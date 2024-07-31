@@ -2,12 +2,14 @@ import { global } from './utils/global.js';
 import { applyPatch } from './updateVersion.js';
 import { services } from './services/index.js';
 
-const baseTag = 'ui-2.0.5';  // Previous version tag
-const headTag = 'ui-2.0.6';  // Current version tag
+// const baseTag = 'ui-2.0.5';  // Previous version tag
+// const headTag = 'ui-2.0.6';  // Current version tag
 
-export async function getDiffFunc() {
+export async function getDiffFunc(myVersion, targetVersion) {
+    const { baseTag, headTag } = await getAllTags(myVersion, targetVersion);
+
     try {
-        const { data } = await services.tag.fetchComparison(global.target_owner, global.target_repo, baseTag, `${headTag}`);
+        const { data } = await services.tag.fetchComparison(global.targetOwner, global.targetRepo, baseTag, `${headTag}`);
         const baseJson = data;
         // console.log(baseJson);
         if (!baseJson.files) {
@@ -36,9 +38,9 @@ export async function getDiffFunc() {
                 console.log(`patch: ${file.patch}`);
                 console.log('------------------------');
                 // checkForChanges(file.patch);
-                if (file.filename === 'packages/ui-react/package.json')
+                if (file.filename === 'packages/ui-react/package.json') { 
                     applyPatch(file.patch);
-
+                }
             });
 
         } else {
@@ -50,6 +52,15 @@ export async function getDiffFunc() {
     } catch (error) {
         console.error('Error fetching data:', error);
     }
+}
+
+async function getAllTags(myVersion, targetVersion) {
+    const { data } = await services.tag.fetchTags(global.targetOwner, global.targetRepo);
+    // console.log(data);
+    const baseTag = data.find(tag => tag.name.includes(myVersion));
+    const headTag = data.find(tag => tag.name.includes(targetVersion));
+    console.log(baseTag, headTag);
+    return { baseTag: baseTag.name, headTag: headTag.name }
 }
 
 // Function to compare two PRs

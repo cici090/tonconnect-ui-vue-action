@@ -5,8 +5,8 @@ export const global = {
     newBranch: 'update-package',
     accessToken: 'YOUR_GITHUB_ACCESS_TOKEN',
 
-    target_owner: 'ton-connect',
-    target_repo: 'sdk',
+    targetOwner: 'ton-connect',
+    targetRepo: 'sdk',
 
     packageJsonPath: 'package.json',
     COMMIT_MESSAGE : 'Update package'

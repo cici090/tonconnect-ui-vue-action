@@ -11,7 +11,7 @@ function comparePackageVersions(package1, package2) {
             return;
         }
 
-        const version1 = stdout1.trim();
+        const myVersion = stdout1.trim();
 
         exec(npmCommand2, (error, stdout2) => {
             if (error) {
@@ -19,16 +19,17 @@ function comparePackageVersions(package1, package2) {
                 return;
             }
 
-            const version2 = stdout2.trim();
+            const targetVersion = stdout2.trim();
 
-            console.log(`${package1} latest version: ${version1}`);
-            console.log(`${package2} latest version: ${version2}`);
+            console.log(`${package1} latest version: ${myVersion}`);
+            console.log(`${package2} latest version: ${targetVersion}`);
 
-            if (version1 === version2) {
+            if (myVersion === targetVersion) {
                 console.log(`Both packages (${package1} and ${package2}) have the same version.`);
             } else {
                 console.log(`Versions of ${package1} and ${package2} are different.`);
-                getDiffFunc(version1, version2);
+                // getDiffFunc(myVersion, targetVersion);
+                getDiffFunc('2.0.5', targetVersion);
             }
         });
     });

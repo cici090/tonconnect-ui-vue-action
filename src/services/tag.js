@@ -22,7 +22,7 @@ export class TagService {
      */
     fetchTags(owner, repo) {
         const url = `/${owner}/${repo}/tags`;
-        get(url)
+        return get(url)
     }
 
     /**
