@@ -1,3 +1,4 @@
+import { createIssue } from './diff.js';
 import { services } from './services/index.js';
 import { global } from './utils/global.js'
 
@@ -17,6 +18,23 @@ export async function applyPatch(patchContent) {
             .filter(line => line.startsWith('+') && !line.startsWith('+++'))
             .map(line => line.substring(1)); // remove +
 
+        const targetFiles = [
+            `"version"`,
+            `"@tonconnect/ui"`
+        ];
+
+        const onlyTargetFiles = modifiedLines.length === targetFiles.length &&
+            modifiedLines.every(line => {
+                const parsedLine = line.split(': ');
+                const field = parsedLine[0];
+                return targetFiles.includes(field.trim())
+            });
+
+        if (!onlyTargetFiles) {
+            createIssue();
+            return;
+        }
+
         modifiedLines.forEach(line => {
             const parsedLine = line.split(': ');
             const field = parsedLine[0];
@@ -24,7 +42,6 @@ export async function applyPatch(patchContent) {
 
             if (field.trim() === `"version"`) {
                 packageJson.version = value.replace(/"/g, '');
-                console.log(packageJson.version);
             } else if (field.trim() === `"@tonconnect/ui"`) {
                 packageJson.dependencies['@tonconnect/ui'] = value.replace(/"/g, '');
             }
@@ -39,7 +56,6 @@ export async function applyPatch(patchContent) {
 
 
 export async function createBranchAndCommit(packageJson) {
-
     try {
         await createNewBranch();
         await updateFileContent(packageJson);
