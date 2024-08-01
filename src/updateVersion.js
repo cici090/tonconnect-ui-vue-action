@@ -31,7 +31,7 @@ export async function applyPatch(patchContent) {
             });
 
         if (!onlyTargetFiles) {
-            createIssue();
+            createIssue('There are more modifications upstream');
             return;
         }
 
@@ -64,7 +64,7 @@ export async function createBranchAndCommit(packageJson) {
         console.log('File modification and commit successful!');
     } catch (error) {
         console.error('Error occurred while creating branch and committing file:', error);
-        createIssue()
+        createIssue('Error occurred while creating branch and committing file')
     }
 }
 
@@ -80,7 +80,7 @@ async function createNewBranch() {
         console.log(`Branch ${branchName} created successfully!`);
     } else {
         console.log(`Failed to create branch ${branchName}!`);
-        createIssue()
+        createIssue(`Failed to create branch ${branchName}!`)
     }
     return refResponse;
 }
@@ -101,7 +101,7 @@ async function updateFileContent(packageJson) {
 
     } else {
         console.error('Error updating file:', data);
-        createIssue()
+        createIssue('Error updating file')
     }
 }
 
@@ -120,7 +120,7 @@ async function mergeBranches() {
         await services.git.deleteBranch(global.owner, global.repo, branchName);
     } else {
         console.log('Error Merge:', data);
-        吧v()
+        createIssue('Error Merge');
     }
 }
 

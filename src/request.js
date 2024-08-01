@@ -3,6 +3,7 @@ const GITHUB_API_BASE_URL = 'https://api.github.com';
 const githubToken = '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';
 
 const mergePath = path => {
+  if (path.includes('https')) return path;
   return GITHUB_API_BASE_URL + '/repos' + path;
 }
 axios.defaults.headers.get["Content-Type"] =

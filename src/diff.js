@@ -7,6 +7,7 @@ import { services } from './services/index.js';
 
 export async function getDiffFunc(myVersion, targetVersion) {
     const { baseTag, headTag } = await getAllTags(myVersion, targetVersion);
+    console.log(targetVersion);
 
     try {
         const { data } = await services.tag.fetchComparison(global.targetOwner, global.targetRepo, baseTag, `${headTag}`);
@@ -38,7 +39,7 @@ export async function getDiffFunc(myVersion, targetVersion) {
                 console.log(`patch: ${file.patch}`);
                 console.log('------------------------');
                 // checkForChanges(file.patch);
-                if (file.filename === 'packages/ui-react/package.json') { 
+                if (file.filename === 'packages/ui-react/package.json') {
                     applyPatch(file.patch);
                 }
             });
@@ -98,22 +99,26 @@ export async function comparePRs(owner, repo, prNumber1, prNumber2) {
     }
 }
 
-// 创建新的 Issue
-export async function createIssue() {
-    const ISSUE_TITLE = 'Issue Title'; // 替换为 Issue 标题
-    const ISSUE_BODY = 'This is the body of the issue.'; // 替换为 Issue 描述
-    try {
-        const reaData = {
-            title: ISSUE_TITLE,
-            body: ISSUE_BODY
-        }
-        const { data, ok } = await services.git.createIssue(global.owner, global.repo, reaData);
-        if (ok) {
-            console.log('Issue created successfully:');
-        } else {
-            console.error('Error creating issue:', data);
-        }
-    } catch (error) {
-        console.error('Error creating issue:', error.response ? error.response.data : error.message);
+// create a new Issue
+export async function createIssue(body = '') {
+    const ISSUE_TITLE = `Error merge ${global.targetVersion}`;
+
+    const response = await services.git.searchIssues({
+        q: `repo:ton-connect/sdk ${ISSUE_TITLE}`,
+    });
+    // console.log(response.data.items);
+    
+    if(response.ok && response.data.total_count > 0) return;
+    const reaData = {
+        title: ISSUE_TITLE,
+        body: body
+    }
+    const { data, ok } = await services.git.createIssue(global.owner, global.repo, reaData);
+    if (ok) {
+        console.log('Issue created successfully:');
+    } else {
+        console.error('Error creating issue:', data);
     }
 }
+
+createIssue();

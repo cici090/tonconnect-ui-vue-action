@@ -9,7 +9,9 @@ export const global = {
     targetRepo: 'sdk',
 
     packageJsonPath: 'package.json',
-    COMMIT_MESSAGE : 'Update package'
+    COMMIT_MESSAGE : 'Update package',
+
+    targetVersion : ''
 } 
 
 export default global;

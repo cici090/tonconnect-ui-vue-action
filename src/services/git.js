@@ -38,4 +38,9 @@ export class GitService {
     }
 
 
+    searchIssues(data){
+        const url = `https://api.github.com/search/issues`
+        return get(url, data);
+    }
+
 }

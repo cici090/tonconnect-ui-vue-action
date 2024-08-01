@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import { getDiffFunc}  from './diff.js';
+import { global } from './utils/global.js';
 
 function comparePackageVersions(package1, package2) {
     const npmCommand1 = `npm show ${package1} version`;
@@ -20,6 +21,7 @@ function comparePackageVersions(package1, package2) {
             }
 
             const targetVersion = stdout2.trim();
+            global.targetVersion = targetVersion;
 
             console.log(`${package1} latest version: ${myVersion}`);
             console.log(`${package2} latest version: ${targetVersion}`);
